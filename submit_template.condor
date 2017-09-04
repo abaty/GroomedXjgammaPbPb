@@ -1,0 +1,17 @@
+Universe     = vanilla
+Initialdir   = SED_PWDHERE
+Notification = Error
+Executable   = run.sh
+Arguments    = $(Process) SED_njobs SED_otherParams
+GetEnv       = True
+Output       = SED_PWDHERE/Logs/condor-$(Process).out
+Error        = SED_PWDHERE/Logs/condor-$(Process).err
+Log          = SED_PWDHERE/Logs/condor-$(Process).log
+Rank         = Mips
++AccountingGroup = "analysis.dav2105"
+requirements = GLIDEIN_Site == "MIT_CampusFactory" && (BOSCOGroup == "bosco_cmshi") && HAS_CVMFS_cms_cern_ch && BOSCOCluster == "ce03.cmsaf.mit.edu" 
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = inputs.tar.gz, run.sh
+
+Queue SED_njobs
