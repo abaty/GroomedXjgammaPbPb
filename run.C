@@ -35,6 +35,10 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
   std::vector< float > * phoEt = 0;
   std::vector< float > * phoPhi = 0;
   std::vector< float > * phoEta = 0;
+  std::vector< float > * phoE5x5 = 0;
+  std::vector< float > * phoE1x5 = 0;
+  std::vector< float > * phoE2x5 = 0;
+  std::vector< float > * phoE3x3 = 0;
   float gammaPt, gammaEta, gammaPhi, gammaSigIEIE;
 
   int nref;
@@ -107,7 +111,7 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
     TTree * photons = (TTree*)f->Get("ggHiNtuplizer/EventTree");
     photons->SetBranchAddress("pho_seedTime",&seedTime);
     photons->SetBranchAddress("pho_swissCrx",&swissCrx);
-    photons->SetBranchAddress("phoSigmaIEtaIEta",&sigmaIEtaIEta);
+    photons->SetBranchAddress("phoSigmaIEtaIEta_2012",&sigmaIEtaIEta);
     photons->SetBranchAddress("pho_ecalClusterIsoR4",&ecalR4);
     photons->SetBranchAddress("pho_hcalRechitIsoR4",&hcalR4);
     photons->SetBranchAddress("pho_trackIsoR4PtCut20",&trkR4);
@@ -115,6 +119,10 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
     photons->SetBranchAddress("phoEt",&phoEt);
     photons->SetBranchAddress("phoPhi",&phoPhi);
     photons->SetBranchAddress("phoEta",&phoEta);
+    photons->SetBranchAddress("phoE5x5",&phoE5x5);
+    photons->SetBranchAddress("phoE3x3",&phoE3x3);
+    photons->SetBranchAddress("phoE1x5",&phoE1x5);
+    photons->SetBranchAddress("phoE2x5",&phoE2x5);
 
     TTree * jets = (TTree*)f->Get(Form("%s/t",s.jetTree.c_str()));
     jets->SetBranchAddress("nref",&nref);
@@ -148,6 +156,18 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
       if(!((ecalR4->at(leadPhoIndx)+hcalR4->at(leadPhoIndx)+trkR4->at(leadPhoIndx)) < 1 && (hOverE->at(leadPhoIndx)<0.1))) continue;//isolation of leading
       //leading not in the signal or sideband region 
       if(!(sigmaIEtaIEta->at(leadPhoIndx)<0.01 || (sigmaIEtaIEta->at(leadPhoIndx)>0.011 && sigmaIEtaIEta->at(leadPhoIndx)<0.017 ))) continue;
+      //check if photon is noisy (cut copied from https://github.com/CmsHI/ElectroWeak-Jet-Track-Analyses/blob/master/ForestSkimmers/photons/gammaJetSkim.C#L810-L817)
+      if (((phoE3x3)->at(leadPhoIndx) / (phoE5x5)->at(leadPhoIndx) > 2. / 3. - 0.03 &&
+           (phoE3x3)->at(leadPhoIndx) / (phoE5x5)->at(leadPhoIndx) < 2. / 3. + 0.03) &&
+          ((phoE1x5)->at(leadPhoIndx) / (phoE5x5)->at(leadPhoIndx) > 1. / 3. - 0.03 &&
+           (phoE1x5)->at(leadPhoIndx) / (phoE5x5)->at(leadPhoIndx) < 1. / 3. + 0.03) &&
+          ((phoE2x5)->at(leadPhoIndx) / (phoE5x5)->at(leadPhoIndx) > 2. / 3. - 0.03 &&
+           (phoE2x5)->at(leadPhoIndx) / (phoE5x5)->at(leadPhoIndx) < 2. / 3. + 0.03)) {
+        continue;
+      }
+
+ 
+
       gammaPt = phoEt->at(leadPhoIndx);
       gammaEta = phoEta->at(leadPhoIndx);
       gammaPhi = phoPhi->at(leadPhoIndx);

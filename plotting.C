@@ -39,35 +39,50 @@ void plotting(){
   TCanvas * c = new TCanvas("c","c",800,600);
 
   const int nCentBins = 9;
-  const float centBinsLow[nCentBins] = {0,0,0,10,10,20,30,30,50};
-  const float centBinsHigh[nCentBins] = {10,20,30,30,50,50,50,100,100};
+  const int centBinsLow[nCentBins] = {0,0,0,10,10,20,30,30,50};
+  const int centBinsHigh[nCentBins] = {10,20,30,30,50,50,50,100,100};
   const int nPhoPtBins = 9;
-  const float phoBinLow[nPhoPtBins] = {40,60,80,100,40,60,80,60,40};
-  const float phoBinLow[nPhoPtBins] = {60,80,100,999,80,100,999,999,999};
+  const int phoBinLow[nPhoPtBins] = {40,60,80,100,40,60,80,60,40};
+  const int phoBinHigh[nPhoPtBins] = {60,80,100,999,80,100,999,999,999};
 
   //plots
-  TFile * out = new TFile::Open("plots.root","recreate");
-  TH1D * xjg_DR12_LT_Z0B0p1[3][nCentBins][nPho]; 
-  TH1D * xjg_DR12_GT_Z0B0p1[3][nCentBins][nPho]; 
-  TH1D * xjg_DR12_LT_Z0p5Z1p5[3][nCentBins][nPho]; 
-  TH1D * xjg_DR12_GT_Z0p5B1p5[3][nCentBins][npho]; 
-  for(int p = 0; p<nPho; p++){
-    for(int c = 0; c<nCentBins; c++){
-      for(int i = 0; i<3; i++){
+  TFile * out = TFile::Open("outputPlots.root","recreate");
+  TH1D * xjg_DR12_LT_Z0B0p1[3][nCentBins][nPhoPtBins]; 
+  TH1D * xjg_DR12_GT_Z0B0p1[3][nCentBins][nPhoPtBins]; 
+  TH1D * xjg_DR12_LT_Z0p5B1p5[3][nCentBins][nPhoPtBins]; 
+  TH1D * xjg_DR12_GT_Z0p5B1p5[3][nCentBins][nPhoPtBins]; 
+  TH1D * side_xjg_DR12_LT_Z0B0p1[3][nCentBins][nPhoPtBins]; 
+  TH1D * side_xjg_DR12_GT_Z0B0p1[3][nCentBins][nPhoPtBins]; 
+  TH1D * side_xjg_DR12_LT_Z0p5B1p5[3][nCentBins][nPhoPtBins]; 
+  TH1D * side_xjg_DR12_GT_Z0p5B1p5[3][nCentBins][nPhoPtBins]; 
+  for(int p = 0; p<nPhoPtBins; p++){//photon loop
+    for(int c = 0; c<nCentBins; c++){//cent loop
+      for(int i = 1; i<4; i++){//dR loop
         std::cout << p << " " << c << " " << i << std::endl;
         xjg_DR12_LT_Z0B0p1[i][c][p] = new TH1D(Form("xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
-        xjg_DR12_GT_Z0B0p1[i][c][p] = new TH1D(Form("xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
-        xjg_DR12_LT_Z0p1B1p5[i][c][p] = new TH1D(Form("xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
-        xjg_DR12_GT_Z0p1B1p5[i][c][p] = new TH1D(Form("xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
+        xjg_DR12_GT_Z0B0p1[i][c][p] = new TH1D(Form("xjg_DR12_GT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("xjg_DR12_GT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
+        xjg_DR12_LT_Z0p5B1p5[i][c][p] = new TH1D(Form("xjg_DR12_LT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("xjg_DR12_LT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
+        xjg_DR12_GT_Z0p5B1p5[i][c][p] = new TH1D(Form("xjg_DR12_GT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("xjg_DR12_GT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
       
-        t->Draw(Form("jetPt/phoPt>>xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE<0.01 && phoPt>%d && phoPt<%d && dR12_Z0B0p1<%f",centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p],i/(float)10));
-        t->Draw(Form("jetPt/phoPt>>xjg_DR12_GT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE<0.01 && phoPt>%d && phoPt<%d && dR12_Z0B0p1>%f",centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p],i/(float)10));
-        t->Draw(Form("jetPt/phoPt>>xjg_DR12_LT_Z0p5Z1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE<0.01 && phoPt>%d && phoPt<%d && dR12_Z0p5Z1p5<%f",centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p],i/(float)10));
-        t->Draw(Form("jetPt/phoPt>>xjg_DR12_GT_Z0p5Z1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE<0.01 && phoPt>%d && phoPt<%d && dR12_Z0p5Z1p5>%f",centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p],i/(float)10));
+        t->Draw(Form("jetPt/phoPt>>xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE<0.01 && phoPt>%f && phoPt<%f && dR12_Z0B0p1<%f",centBinsLow[c],centBinsHigh[c],(float)phoBinLow[p],(float)phoBinHigh[p],i/(float)10));
+        t->Draw(Form("jetPt/phoPt>>xjg_DR12_GT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE<0.01 && phoPt>%f && phoPt<%f && dR12_Z0B0p1>%f",centBinsLow[c],centBinsHigh[c],(float)phoBinLow[p],(float)phoBinHigh[p],i/(float)10));
+        t->Draw(Form("jetPt/phoPt>>xjg_DR12_LT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE<0.01 && phoPt>%f && phoPt<%f && dR12_Z0p5B1p5<%f",centBinsLow[c],centBinsHigh[c],(float)phoBinLow[p],(float)phoBinHigh[p],i/(float)10));
+        t->Draw(Form("jetPt/phoPt>>xjg_DR12_GT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE<0.01 && phoPt>%f && phoPt<%f && dR12_Z0p5B1p5>%f",centBinsLow[c],centBinsHigh[c],(float)phoBinLow[p],(float)phoBinHigh[p],i/(float)10));
+        
+        //sideband
+        side_xjg_DR12_LT_Z0B0p1[i][c][p] = new TH1D(Form("side_xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("side_xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
+        side_xjg_DR12_GT_Z0B0p1[i][c][p] = new TH1D(Form("side_xjg_DR12_GT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("side_xjg_DR12_GT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
+        side_xjg_DR12_LT_Z0p5B1p5[i][c][p] = new TH1D(Form("side_xjg_DR12_LT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("side_xjg_DR12_LT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
+        side_xjg_DR12_GT_Z0p5B1p5[i][c][p] = new TH1D(Form("side_xjg_DR12_GT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("side_xjg_DR12_GT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),20,0,2);
+      
+        t->Draw(Form("jetPt/phoPt>>side_xjg_DR12_LT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE>0.011 && phoSigIEIE<0.017 && phoPt>%f && phoPt<%f && dR12_Z0B0p1<%f",centBinsLow[c],centBinsHigh[c],(float)phoBinLow[p],(float)phoBinHigh[p],i/(float)10));
+        t->Draw(Form("jetPt/phoPt>>side_xjg_DR12_GT_Z0B0p1_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE>0.011 && phoSigIEIE<0.017 && phoPt>%f && phoPt<%f && dR12_Z0B0p1>%f",centBinsLow[c],centBinsHigh[c],(float)phoBinLow[p],(float)phoBinHigh[p],i/(float)10));
+        t->Draw(Form("jetPt/phoPt>>side_xjg_DR12_LT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE>0.011 && phoSigIEIE<0.017 && phoPt>%f && phoPt<%f && dR12_Z0p5B1p5<%f",centBinsLow[c],centBinsHigh[c],(float)phoBinLow[p],(float)phoBinHigh[p],i/(float)10));
+        t->Draw(Form("jetPt/phoPt>>side_xjg_DR12_GT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]),Form("hiBin>=%d && hiBin<%d && phoSigIEIE>0.011 && phoSigIEIE<0.017  && phoPt>%f && phoPt<%f && dR12_Z0p5B1p5>%f",centBinsLow[c],centBinsHigh[c],(float)phoBinLow[p],(float)phoBinHigh[p],i/(float)10));
       }
     }
   }
-  
+  out->Write(); 
   
 
 
