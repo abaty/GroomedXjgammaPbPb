@@ -121,10 +121,11 @@ void Mixing::getEvent(bool reset){
     if(currentEvtIndx >= evt->GetEntries()){
       getNextFile();     
     }
-    evt->GetEntry(currentEvtIndx);
+    hlt->GetEntry(currentEvtIndx);
     skim->GetEntry(currentEvtIndx); 
     if(!(trigger && HBHE && hfcoinc3 && pCluster && pVtx)) continue;
     evt->GetEntry(currentEvtIndx); 
+    if(TMath::Abs(vz)>15) continue;
   
     break; 
   }
