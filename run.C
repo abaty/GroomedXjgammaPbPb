@@ -8,9 +8,17 @@
 #include <string>
 #include "skimSettings.h"
 #include "Tools.h"
+#include "Mixing.h"
 
-void gammaJetSkim(std::vector< std::string > inputFiles, int job){
+void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::string > mixFiles , int job, int nJobs){
   SkimSettings s = SkimSettings();
+  
+  Mixing mix = Mixing(mixFiles,(int)(job*(float)mixFiles.size()/(float)nJobs));
+  mix.setTriggerName("HLT_HISinglePhoton40_Eta1p5_v1");
+  mix.setJetCollection("akCs4PFJetAnalyzer");
+  std::vector<std::string> subTemp;
+  for(int i = 0; i<s.nSubJetTrees; i++) subTemp.push_back(s.subJetTreeNames[i]);
+  mix.setSubjetCollections(subTemp);
 
   int trig = 0;
   int hfCoinc = 0; 
@@ -62,6 +70,9 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
   std::vector< float > subjet2Eta[s.nSubJetTrees];
   std::vector< float > subjet2Phi[s.nSubJetTrees];
   std::vector< float > dR12[s.nSubJetTrees];
+  std::vector< float > mixdR12[s.nSubJetTrees];
+
+  std::vector< float > mixedJetPts, mixedJetWeights;
 
   TFile * output = TFile::Open(Form("output_%d.root",job),"recreate");
   TTree * outTree = new TTree("skim","Photon+GroomedJetSubStructure skim");
@@ -77,6 +88,8 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
   outTree->Branch("jetPt",&jetPt);
   outTree->Branch("jetEta",&jetEta);
   outTree->Branch("jetPhi",&jetPhi);
+  outTree->Branch("mixJetPt",&mixedJetPts);
+  outTree->Branch("mixJetWeight",&mixedJetWeights);
   for(int i = 0; i<s.nSubJetTrees; i++){
     outTree->Branch(Form("subjet1Pt_%s",s.subJetoutBranchNames[i].c_str()),&(subjet1Pt[i]));
     outTree->Branch(Form("subjet1Eta_%s",s.subJetoutBranchNames[i].c_str()),&(subjet1Eta[i]));
@@ -85,6 +98,7 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
     outTree->Branch(Form("subjet2Eta_%s",s.subJetoutBranchNames[i].c_str()),&(subjet2Eta[i]));
     outTree->Branch(Form("subjet2Phi_%s",s.subJetoutBranchNames[i].c_str()),&(subjet2Phi[i]));
     outTree->Branch(Form("dR12_%s",s.subJetoutBranchNames[i].c_str()),&(dR12[i]));
+    outTree->Branch(Form("mixdR12_%s",s.subJetoutBranchNames[i].c_str()),&(mixdR12[i]));
   }
 
   for(unsigned int file = 0; file<inputFiles.size(); file++){
@@ -166,8 +180,6 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
         continue;
       }
 
- 
-
       gammaPt = phoEt->at(leadPhoIndx);
       gammaEta = phoEta->at(leadPhoIndx);
       gammaPhi = phoPhi->at(leadPhoIndx);
@@ -241,6 +253,21 @@ void gammaJetSkim(std::vector< std::string > inputFiles, int job){
           }
         }
       }
+
+      //mixing 
+      mixedJetPts.clear();
+      mixedJetWeights.clear();
+      for(int j = 0; j<s.nSubJetTrees; j++){
+        mixdR12[j].clear();
+      }
+
+      for(int m = 0; m<s.nMixEvts; m++){
+        mix.getEvent(hiBin);
+        mix.getBack2BackJets(mixedJetPts, s.jetEtaCut, gammaPhi, s.dPhiCut, s.jetPtCut);
+        for(int ii = 0; ii<s.nSubJetTrees; ii++) mix.getSubjets(mixdR12[ii],ii,s.groomedJetMatchingCut,s.jetEtaCut, gammaPhi, s.dPhiCut, s.jetPtCut);
+      }
+      for(unsigned int mm = 0; mm<mixedJetPts.size(); mm++) mixedJetWeights.push_back(1/(float)s.nMixEvts);
+
       outTree->Fill();
    }//end event loop
     f->Close();
@@ -285,7 +312,7 @@ int main(int argc, const char* argv[])
 
   dummy = dummy+1;
 
-  gammaJetSkim(listOfFiles,job);
+  gammaJetSkim(listOfFiles,listOfFiles,job,totalJobs);
 
   return 0; 
 }
