@@ -2,9 +2,9 @@
 
 #each job will be run as ./run.exe <job#> <njobs> <otherParamtersString>
 MainCFile="run.C"
-inputFiles="fileList.txt"
+inputFiles="fileList.txt mixFileList.txt"
 njobs=50
-otherParameters="fileList.txt 56"
+otherParameters="fileList.txt mixFileList.txt"
 
 
 #do not edit anything below unless you know what you are doing

@@ -79,6 +79,8 @@ class Mixing{
 inline void Mixing::setTriggerNames(std::vector< std::string >  names){
   if(names.size()>10) std::cout << "Warning, more than 10 triggers specified, increase size of array in Mixing class!" << std::endl;
   mixTriggerNames = names;
+  setTrees();
+  setBranches();
 }
 
 inline void Mixing::setJetCollection(std::string name){
