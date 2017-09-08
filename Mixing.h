@@ -12,7 +12,7 @@
 class Mixing{
   public:
 
-    inline void setTriggerName(std::string name);
+    inline void setTriggerNames(std::vector< std::string >  names);
     inline void setJetCollection(std::string name);
     inline void setVzMatchingWindow(float window);   
     inline void setEvtPlaneMatchingWindow(float window);   
@@ -34,7 +34,7 @@ class Mixing{
     ~Mixing();
  
   private:
-    std::string mixTriggerName = "HLT_HIL1MinimumBiasHF2AND_part1_v1";
+    std::vector< std::string > mixTriggerNames;
     std::string jetCollection = "akCs4PFJetAnalyzer";
     std::vector< std::string > subjetCollections;
     float vzMatchingWindow = 5;
@@ -55,7 +55,8 @@ class Mixing{
     void setTrees();
     void setBranches();
     
-    //branch variables 
+    //branch variables
+    int triggerList[10] = {0}; 
     int trigger, HBHE, pVtx, hfcoinc3, pCluster;
     int hiBin;
     float evtPlane[29];
@@ -75,8 +76,9 @@ class Mixing{
     std::vector< std::string > mixFileList;
 };
 
-inline void Mixing::setTriggerName(std::string name){
-  mixTriggerName = name;
+inline void Mixing::setTriggerNames(std::vector< std::string >  names){
+  if(names.size()>10) std::cout << "Warning, more than 10 triggers specified, increase size of array in Mixing class!" << std::endl;
+  mixTriggerNames = names;
 }
 
 inline void Mixing::setJetCollection(std::string name){
@@ -128,7 +130,7 @@ void Mixing::setTrees(){
 }
 
 void Mixing::setBranches(){
-  hlt->SetBranchAddress(mixTriggerName.c_str(),&trigger);
+  for(unsigned int i = 0; i<mixTriggerNames.size(); i++) hlt->SetBranchAddress(mixTriggerNames.at(i).c_str(),&(triggerList[i]));
   evt->SetBranchAddress("hiBin",&hiBin);
   evt->SetBranchAddress("vz",&vz);
   evt->SetBranchAddress("hiEvtPlanes",&evtPlane);
@@ -154,6 +156,8 @@ void Mixing::getEvent(bool reset){
       getNextFile();     
     }
     hlt->GetEntry(currentEvtIndx);
+    trigger = 0;
+    for(unsigned int i = 0; i<mixTriggerNames.size(); i++) trigger = trigger || triggerList[i];
     skim->GetEntry(currentEvtIndx); 
     if(!(trigger && HBHE && hfcoinc3 && pCluster && pVtx)) continue;
     evt->GetEntry(currentEvtIndx); 

@@ -14,7 +14,10 @@ void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::strin
   SkimSettings s = SkimSettings();
   
   Mixing mix = Mixing(mixFiles,(int)(job*(float)mixFiles.size()/(float)nJobs));
-  mix.setTriggerName("HLT_HISinglePhoton40_Eta1p5_v1");
+  std::vector< std::string > triggers;
+  triggers.push_back("HLT_HIL1MinimumBiasHF2AND_part1_v1");
+  triggers.push_back("HLT_HIL1MinimumBiasHF2AND_v1");
+  mix.setTriggerNames(triggers);
   mix.setJetCollection("akCs4PFJetAnalyzer");
   std::vector<std::string> subTemp;
   for(int i = 0; i<s.nSubJetTrees; i++) subTemp.push_back(s.subJetTreeNames[i]);
@@ -262,7 +265,7 @@ void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::strin
       }
 
       for(int m = 0; m<s.nMixEvts; m++){
-        mix.getEvent(hiBin);
+        mix.getEvent(hiBin, vz, evtPlane);
         mix.getBack2BackJets(mixedJetPts, s.jetEtaCut, gammaPhi, s.dPhiCut, s.jetPtCut);
         for(int ii = 0; ii<s.nSubJetTrees; ii++) mix.getSubjets(mixdR12[ii],ii,s.groomedJetMatchingCut,s.jetEtaCut, gammaPhi, s.dPhiCut, s.jetPtCut);
       }
@@ -288,7 +291,7 @@ int main(int argc, const char* argv[])
   int job = std::atoi(argv[1]);
   int totalJobs = std::atoi(argv[2]);
   std::string fList = argv[3];
-  int dummy = std::atoi(argv[4]);
+  std::string mList = argv[4];
   std::string buffer;
   std::vector<std::string> listOfFiles;
   std::ifstream inFile(fList.data());
@@ -310,9 +313,27 @@ int main(int argc, const char* argv[])
     }
   }
 
-  dummy = dummy+1;
+  std::string mbuffer;
+  std::vector<std::string> mlistOfFiles;
+  std::ifstream minFile(mList.data());
+  if(!minFile.is_open())
+  {
+    std::cout << "Error opening jet file. Exiting." <<std::endl;
+    return 1;
+  }
+  else
+  {
+    int line = 0;
+    while(true)
+    {
+      minFile >> mbuffer;
+      if(minFile.eof()) break;
+      mlistOfFiles.push_back(mbuffer);
+      line++;
+    }
+  }
 
-  gammaJetSkim(listOfFiles,listOfFiles,job,totalJobs);
+  gammaJetSkim(listOfFiles,mlistOfFiles,job,totalJobs);
 
   return 0; 
 }
