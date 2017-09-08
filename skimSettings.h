@@ -26,7 +26,7 @@ class SkimSettings{
   std::string subJetoutBranchNames[nSubJetTrees] = {"Z0B0p1","Z0p5B1p5"};
 
   int nEvts = -1;
-  int nMixEvts = 5;
+  int nMixEvts = 2;
 
   SkimSettings();
   

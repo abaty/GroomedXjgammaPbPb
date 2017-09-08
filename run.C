@@ -153,6 +153,7 @@ void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::strin
     //event loop
     for(int i = 0; i<((s.nEvts<0)?hlt->GetEntries():(TMath::Min(s.nEvts,(int)hlt->GetEntries()))); i++){
       hlt->GetEntry(i);
+      if(i%1000==0) std::cout << i << "/" << hlt->GetEntries() << std::endl;
       if(!trig) continue;
       if(!(hfCoinc && HBHE && pVtx && clusterCompat)) continue;
 
@@ -265,6 +266,7 @@ void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::strin
       }
 
       for(int m = 0; m<s.nMixEvts; m++){
+        std::cout << hiBin << " " << vz << " " << evtPlane << std::endl;
         mix.getEvent(hiBin, vz, evtPlane);
         mix.getBack2BackJets(mixedJetPts, s.jetEtaCut, gammaPhi, s.dPhiCut, s.jetPtCut);
         for(int ii = 0; ii<s.nSubJetTrees; ii++) mix.getSubjets(mixdR12[ii],ii,s.groomedJetMatchingCut,s.jetEtaCut, gammaPhi, s.dPhiCut, s.jetPtCut);

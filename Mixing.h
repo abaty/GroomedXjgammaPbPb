@@ -66,6 +66,8 @@ class Mixing{
     float jetEta[1000];
     float jetPhi[1000];
 
+    TBranch *b_hiBin, *b_vz, *b_evtPlane;
+
     int groomnref;
     float groomjtphi[1000];
     float groomjteta[1000];
@@ -74,6 +76,8 @@ class Mixing{
     std::vector< std::vector< float >> * subjetPt = 0;
 
     std::vector< std::string > mixFileList;
+
+    bool passesEvtSelection();
 };
 
 inline void Mixing::setTriggerNames(std::vector< std::string >  names){
@@ -126,6 +130,10 @@ void Mixing::getNextFile(){
 
 void Mixing::setTrees(){
   evt = (TTree*)f->Get("hiEvtAnalyzer/HiTree");
+  if(evt->GetEntries()==0){
+    getNextFile();//this calls setTrees again, so don't continue
+    return;
+  }
   hlt = (TTree*)f->Get("hltanalysis/HltTree");
   skim = (TTree*)f->Get("skimanalysis/HltTree");
   jet = (TTree*)f->Get(Form("%s/t",jetCollection.c_str())); 
@@ -136,6 +144,10 @@ void Mixing::setBranches(){
   evt->SetBranchAddress("hiBin",&hiBin);
   evt->SetBranchAddress("vz",&vz);
   evt->SetBranchAddress("hiEvtPlanes",&evtPlane);
+  b_hiBin = evt->GetBranch("hiBin");
+  b_vz = evt->GetBranch("vz");
+  b_evtPlane = evt->GetBranch("hiEvtPlanes");
+
   skim->SetBranchAddress("HBHENoiseFilterResultRun2Loose",&HBHE);
   skim->SetBranchAddress("phfCoincFilter3",&hfcoinc3);
   skim->SetBranchAddress("pclusterCompatibilityFilter",&pCluster);
@@ -147,34 +159,35 @@ void Mixing::setBranches(){
   jet->SetBranchAddress("jtphi",&jetPhi);
 }
 
+bool Mixing::passesEvtSelection(){
+  hlt->GetEntry(currentEvtIndx);
+  trigger = 0;
+  for(unsigned int i = 0; i<mixTriggerNames.size(); i++) trigger = trigger || triggerList[i];
+  skim->GetEntry(currentEvtIndx); 
+  if(!(trigger && HBHE && hfcoinc3 && pCluster && pVtx)) return false;
+  if(TMath::Abs(vz)>15) return false;
+  return true;
+}
+
 void Mixing::getEvent(bool reset){
   if(reset) nAttempts = 0;
-  while(true){
-    nAttempts++;
-    currentEvtIndx++;
-    if(nAttempts > maximumAttempts) break;
+  nAttempts++;
+  currentEvtIndx++;
+  if(nAttempts > maximumAttempts) return;
     
-    if(currentEvtIndx >= evt->GetEntries()){
-      getNextFile();     
-    }
-    hlt->GetEntry(currentEvtIndx);
-    trigger = 0;
-    for(unsigned int i = 0; i<mixTriggerNames.size(); i++) trigger = trigger || triggerList[i];
-    skim->GetEntry(currentEvtIndx); 
-    if(!(trigger && HBHE && hfcoinc3 && pCluster && pVtx)) continue;
-    evt->GetEntry(currentEvtIndx); 
-    if(TMath::Abs(vz)>15) continue;
-  
-    break; 
+  if(currentEvtIndx >= evt->GetEntries()){
+    getNextFile();     
   }
 }
 
 void Mixing::getEvent(int _hiBin, bool reset){
   if(reset) nAttempts = 0;
   while(true){
-    getEvent(false);
+    getEvent(false); 
     if(nAttempts > maximumAttempts) break;
+    b_hiBin->GetEntry(currentEvtIndx); 
     if(hiBin != _hiBin) continue;
+    if(reset && !passesEvtSelection()) continue;
     break;
   }
 }
@@ -183,8 +196,11 @@ void Mixing::getEvent(int _hiBin, float _vz, bool reset){
   if(reset) nAttempts = 0;
   while(true){
     getEvent(_hiBin, false);
+    std::cout << nAttempts << " " <<  hiBin << " " << vz << " " << evtPlane[8] << std::endl;
     if(nAttempts > maximumAttempts) break;
+    b_vz->GetEntry(currentEvtIndx); 
     if(TMath::Abs(vz-_vz) > vzMatchingWindow) continue;
+    if(reset && !passesEvtSelection()) continue;
     break;
   }
 }
@@ -194,7 +210,9 @@ void Mixing::getEvent(int _hiBin, float _vz, float _evtPlane, bool reset){
   while(true){
     getEvent(_hiBin, _vz, false);
     if(nAttempts > maximumAttempts) break;
-    if(TMath::ACos(TMath::Cos(evtPlane[8]-_evtPlane)) > evtPlaneMatchingWindow) continue;
+    b_evtPlane->GetEntry(currentEvtIndx); 
+    if(TMath::ACos(TMath::Cos(evtPlane[8]-_evtPlane)) > evtPlaneMatchingWindow && TMath::ACos(TMath::Cos(evtPlane[8]+TMath::Pi()-_evtPlane)) > evtPlaneMatchingWindow ) continue;//add pi b/c evt plane is only from -pi/2 to pi/2, check if boundaries meet up
+    if(reset && !passesEvtSelection()) continue;
     break;
   }
 }
