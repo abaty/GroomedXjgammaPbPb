@@ -15,8 +15,9 @@ void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::strin
   
   Mixing mix = Mixing(mixFiles,(int)(job*(float)mixFiles.size()/(float)nJobs));
   std::vector< std::string > triggers;
-  triggers.push_back("HLT_HIL1MinimumBiasHF2AND_part1_v1");
-  triggers.push_back("HLT_HIL1MinimumBiasHF2AND_v1");
+  triggers.push_back("HLT_HIL1MinimumBiasHF2AND_part3_v1");
+  //triggers.push_back("HLT_HIL1MinimumBiasHF2AND_part1_v1");
+  //triggers.push_back("HLT_HIL1MinimumBiasHF2AND_v1");
   mix.setTriggerNames(triggers);
   mix.setJetCollection("akCs4PFJetAnalyzer");
   std::vector<std::string> subTemp;
@@ -264,9 +265,9 @@ void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::strin
       for(int j = 0; j<s.nSubJetTrees; j++){
         mixdR12[j].clear();
       }
-
+        
+      std::cout << "Mixing: " << hiBin << " " << vz << " " << evtPlane << std::endl;
       for(int m = 0; m<s.nMixEvts; m++){
-        std::cout << hiBin << " " << vz << " " << evtPlane << std::endl;
         mix.getEvent(hiBin, vz, evtPlane);
         mix.getBack2BackJets(mixedJetPts, s.jetEtaCut, gammaPhi, s.dPhiCut, s.jetPtCut);
         for(int ii = 0; ii<s.nSubJetTrees; ii++) mix.getSubjets(mixdR12[ii],ii,s.groomedJetMatchingCut,s.jetEtaCut, gammaPhi, s.dPhiCut, s.jetPtCut);
@@ -334,6 +335,18 @@ int main(int argc, const char* argv[])
       line++;
     }
   }
+
+  /*if(job==0){
+    int sum=0;
+    for(unsigned int i = 0; i<mlistOfFiles.size(); i++){
+      if(i%100==0) std::cout << i << "/" << mlistOfFiles.size() << " " << sum <<  std::endl;
+      TFile * f = TFile::Open(mlistOfFiles.at(i).c_str(),"read");
+      TTree * t = (TTree*)f->Get("hiEvtAnalyzer/HiTree");
+      sum+= t->GetEntries(); 
+      f->Close();
+    }
+    std::cout << "total mixed events: " << sum << std::endl;
+  }*/
 
   gammaJetSkim(listOfFiles,mlistOfFiles,job,totalJobs);
 

@@ -196,7 +196,7 @@ void Mixing::getEvent(int _hiBin, float _vz, bool reset){
   if(reset) nAttempts = 0;
   while(true){
     getEvent(_hiBin, false);
-    std::cout << nAttempts << " " <<  hiBin << " " << vz << " " << evtPlane[8] << std::endl;
+    //std::cout << nAttempts << " " <<  hiBin << " " << vz << " " << evtPlane[8] << std::endl;
     if(nAttempts > maximumAttempts) break;
     b_vz->GetEntry(currentEvtIndx); 
     if(TMath::Abs(vz-_vz) > vzMatchingWindow) continue;
