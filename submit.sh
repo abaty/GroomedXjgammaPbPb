@@ -3,7 +3,7 @@
 #each job will be run as ./run.exe <job#> <njobs> <otherParamtersString>
 MainCFile="run.C"
 inputFiles="fileList.txt mixFileList.txt"
-njobs=50
+njobs=100
 otherParameters="fileList.txt mixFileList.txt"
 
 

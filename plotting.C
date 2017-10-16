@@ -22,30 +22,34 @@ void sidebandSubtr(TH1D * signalClone, TH1D * sideband, float purity){
   delete temp;
 }
 
+void formatPlot(TH1D * h, int color = 0, int lineStyle = 1, int markerStyle = 8){
+  h->SetTitle("");
+  h->GetXaxis()->SetTitle("x_{j#gamma}");
+  h->GetYaxis()->SetTitle("#frac{1}{N_{#gamma}} #frac{dN_{j#gamma}}{dx_{j#gamma}}");
+  h->SetMarkerStyle(markerStyle);
+  h->GetYaxis()->SetRangeUser(-0.2,1.8);
+  if(color==0){
+    h->SetMarkerColor(kBlack);
+    h->SetLineColor(kBlack);
+  }
+  if(color==1){
+    h->SetMarkerColor(kBlue);
+    h->SetLineColor(kBlue);
+  }
+  if(color==2){
+    h->SetMarkerColor(kRed);
+    h->SetLineColor(kRed);
+  }
+  h->SetLineStyle(lineStyle);
+  h->SetStats(0);
+}
+
 void plotting(){
   TH1::SetDefaultSumw2();
 
   //setup
   TFile * in = TFile::Open("skim_sept1.root","read");
   TTree * t = (TTree*)in->Get("skim");
-
-  /*
-  int hiBin;
-  std::vector<float> * jetPt = 0;
-  std::vector<float> * phoPt = 0;
-  std::vector<float> * sigIEIE = 0;
-  std::vector<float> * DR12_Z0B0p1 = 0;
-  std::vector<float> * DR12_Z0p5B1p5 = 0;
-
-  t->SetBranchAddress("jetPt",&jetPt);
-  t->SetBranchAddress("phoPt",&phoPt);
-  t->SetBranchAddress("hiBin",&hiBin);
-  t->SetBranchAddress("phoSigIEIE",&sigIEIE);
-  t->SetBranchAddress("dR12_Z0B0p1",&DR12_Z0B0p1);
-  t->SetBranchAddress("dR12_Z0p5B1p5",&DR12_Z0p5B1p5);
-  */
-
-  TCanvas * c = new TCanvas("c","c",800,600);
 
   const int nXJGBins = 16;
   const float maxXJG = 2;
@@ -195,18 +199,42 @@ void plotting(){
         sidebandSubtr(subtr_xjg_DR12_LT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p], mixsubside_xjg_DR12_LT_Z0B0p1[i][c][p], purity[p][c]);
         subtr_xjg_DR12_GT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p] = (TH1D*) mixsubxjg_DR12_GT_Z0p5B1p5[i][c][p]->Clone(Form("subtr_xjg_DR12_GT_Z0p5B1p5_R0p%d_%d_%d_%d_%d",i+1,centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p]));
         sidebandSubtr(subtr_xjg_DR12_GT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p], mixsubside_xjg_DR12_GT_Z0B0p1[i][c][p], purity[p][c]);
-        subtr_xjg_DR12_LT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->SetLineColor(kRed);
-        subtr_xjg_DR12_LT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->SetLineColor(kRed);
-        subtr_xjg_DR12_LT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->SetMarkerColor(kRed);
-        subtr_xjg_DR12_LT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->SetMarkerColor(kRed);
-        subtr_xjg_DR12_GT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->SetLineColor(kBlue);
-        subtr_xjg_DR12_GT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->SetLineColor(kBlue);
-        subtr_xjg_DR12_GT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->SetMarkerColor(kBlue);
-        subtr_xjg_DR12_GT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->SetMarkerColor(kBlue);
+        
+        formatPlot(subtr_xjg_DR12_LT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p],2,1,20);
+        formatPlot(subtr_xjg_DR12_LT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p],1,1,20);
+        formatPlot(subtr_xjg_DR12_GT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p],2,1,25);
+        formatPlot(subtr_xjg_DR12_GT_Z0p5B1p5[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p],1,1,25);
       }
     }
   }
   std::cout << "writing!" << std::endl;
   out->Write(); 
   std::cout << "done!" << std::endl;
+  std::cout << "Proceeding to Plotting..." << std::endl;
+
+  TCanvas * c1 = new TCanvas("c1","c1",800,600);
+  for(int i = 0; i<3; i++){
+    for(int j = i; j<3; j++){
+      for(int p = 0; p<nPhoPtBins; p++){//photon loop
+        for(int c = 0; c<nCentBins; c++){//cent loop
+          subtr_xjg_DR12_LT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->Draw("p");
+          subtr_xjg_DR12_LT_Z0p5B1p5[j*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->Draw("p same");
+          subtr_xjg_DR12_GT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->Draw("p same");
+          subtr_xjg_DR12_GT_Z0p5B1p5[j*nCentBins*nPhoPtBins+c*nPhoPtBins+p]->Draw("p same");  
+  
+          TLegend * l = new TLegend(0.6,0.6,0.9,0.9);
+          l->AddEntry(subtr_xjg_DR12_LT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p],Form("z=0, #beta=0.1, #DeltaR<0.%d",i+1),"p");
+          l->AddEntry(subtr_xjg_DR12_GT_Z0B0p1[i*nCentBins*nPhoPtBins+c*nPhoPtBins+p],Form("z=0, #beta=0.1, #DeltaR>0.%d",j+1),"p");
+          l->AddEntry(subtr_xjg_DR12_LT_Z0p5B1p5[j*nCentBins*nPhoPtBins+c*nPhoPtBins+p],Form("z=0.5, #beta=1.5, #DeltaR<0.%d",i+1),"p");
+          l->AddEntry(subtr_xjg_DR12_GT_Z0p5B1p5[j*nCentBins*nPhoPtBins+c*nPhoPtBins+p],Form("z=0.5, #beta=1.5, #DeltaR>0.%d",j+1),"p");
+          
+          l->Draw("same");
+          c1->SaveAs(Form("img/%d_%d_%d_%d_LT%d_GT%d.png",centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p],i+1,j+1));
+          c1->SaveAs(Form("img/%d_%d_%d_%d_LT%d_GT%d.pdf",centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p],i+1,j+1));
+          c1->SaveAs(Form("img/%d_%d_%d_%d_LT%d_GT%d.C",centBinsLow[c],centBinsHigh[c],phoBinLow[p],phoBinHigh[p],i+1,j+1));
+          delete l;
+        }
+      }
+    }
+  }
 }

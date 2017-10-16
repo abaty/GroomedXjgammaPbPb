@@ -6,9 +6,9 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include "skimSettings.h"
-#include "Tools.h"
-#include "Mixing.h"
+#include "include/skimSettings.h"
+#include "include/Tools.h"
+#include "include/Mixing.h"
 
 void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::string > mixFiles , int job, int nJobs){
   SkimSettings s = SkimSettings();
