@@ -202,7 +202,7 @@ void gammaJetSkim(std::vector< std::string > inputFiles, std::vector< std::strin
         jetEta.push_back(jteta[j]);
         jetPhi.push_back(jtphi[j]);
       }
-      if(jetPt.size()==0) continue;
+      //if(jetPt.size()==0) continue;I do not think this should be used
 
       for(int j = 0; j<s.nSubJetTrees; j++){
         subjets[j]->SetBranchAddress("nref",&groomnref);
